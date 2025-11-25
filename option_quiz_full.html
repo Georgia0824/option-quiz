@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>期权知识闯关小游戏</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      padding: 20px 22px 30px;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 6px;
+      font-size: 26px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    .hidden { display: none; }
+
+    button {
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background: #4c7fff;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #3a6ae0; }
+    .btn-secondary {
+      background: #e4e9f5;
+      color: #333;
+    }
+    .btn-secondary:hover { background: #d4ddf2; }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .card {
+      border-radius: 10px;
+      background: #f7f8fd;
+      padding: 14px 16px 16px;
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    .card p {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+    }
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .cat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      border: 1px solid #e0e4f0;
+      font-size: 13px;
+    }
+    .cat-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .cat-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .cat-desc {
+      font-size: 12px;
+      color: #777;
+    }
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* 游戏界面 */
+    #game-screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    #mode-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #eef3ff;
+      color: #4c7fff;
+      margin-right: 6px;
+    }
+    #category-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #e7faf2;
+      color: #1c9c68;
+    }
+
+    #progress-bar {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      background: #eceff7;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    #progress-inner {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4c7fff, #45c4ff);
+      transition: width 0.3s ease;
+    }
+
+    #question-box {
+      border-radius: 10px;
+      background: #f7f8fd;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    #question-meta {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    #question-text {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    #options {
+      margin-bottom: 12px;
+    }
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d7dff0;
+      background: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.05s;
+    }
+    .option-btn:hover { background: #f2f5ff; }
+    .option-btn.correct {
+      background: #e5f8e8;
+      border-color: #57c46a;
+    }
+    .option-btn.wrong {
+      background: #ffe8e8;
+      border-color: #ff6b6b;
+    }
+    .option-btn.disabled {
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    #feedback {
+      min-height: 40px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    #feedback.correct { color: #218739; }
+    #feedback.wrong { color: #c53030; }
+    #feedback span.tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-right: 6px;
+    }
+    #feedback .tag-correct {
+      background: #e5f8e8;
+      color: #218739;
+    }
+    #feedback .tag-wrong {
+      background: #ffe8e8;
+      color: #c53030;
+    }
+
+    #control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #end-screen {
+      text-align: center;
+      margin-top: 12px;
+    }
+    #end-screen h2 { margin-top: 0; }
+
+    @media (max-width: 720px) {
+      .container {
+        margin: 8px;
+        padding: 14px;
+      }
+      .mode-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>期权知识闯关</h1>
+    <div class="subtitle">支持分类练习 · 闯关模式记忆进度</div>
+
+    <!-- 模式选择界面 -->
+    <div id="mode-screen">
+      <div class="mode-grid">
+        <!-- 闯关模式 -->
+        <div class="card">
+          <h2>闯关模式 🎮</h2>
+          <p>
+            固定题量，按关卡依次作答。<br>
+            浏览器会记住你在每个分类的当前进度，下次打开可直接继续。
+          </p>
+          <div class="category-list" id="challenge-category-list">
+            <!-- JS 渲染分类行 -->
+          </div>
+        </div>
+
+        <!-- 自由练习模式 -->
+        <div class="card">
+          <h2>自由练习模式 🧠</h2>
+          <p>
+            从某一类题随机抽题，适合背概念、练节奏。<br>
+            不记录分数和进度，想刷多少刷多少。
+          </p>
+          <div class="category-list" id="practice-category-list">
+            <!-- JS 渲染分类行 -->
+          </div>
+        </div>
+      </div>
+      <p style="font-size:12px; color:#999; margin-top:6px;">
+      </p>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="game-screen" class="hidden">
+      <div id="game-screen-header">
+        <div>
+          <span id="mode-tag"></span>
+          <span id="category-tag"></span>
+          <span id="question-counter"></span>
+        </div>
+        <div id="score-area">
+          得分：<span id="score-text">0</span> /
+          <span id="total-text">0</span>
+        </div>
+      </div>
+
+      <div id="progress-bar">
+        <div id="progress-inner"></div>
+      </div>
+
+      <div id="question-box">
+        <div id="question-meta"></div>
+        <div id="question-text"></div>
+      </div>
+
+      <div id="options"></div>
+
+      <div id="feedback"></div>
+
+      <div id="control-row">
+        <button class="btn-secondary" id="back-btn">返回模式选择</button>
+        <div>
+          <button class="btn-secondary" id="restart-category-btn">本类重来</button>
+          <button class="btn-primary" id="next-btn" disabled>下一题 ▶</button>
+        </div>
+      </div>
+
+      <div id="end-screen" class="hidden">
+        <h2>本分类闯关结束 🎉</h2>
+        <p id="final-score"></p>
+        <p style="font-size:13px; color:#555;">
+          可以回到模式选择界面，换一个分类或换成自由练习模式继续刷题。
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ============== 题库：可在这里自由增删改 ==============
+    const QUESTION_BANK = {
+      "基础题": [
+        {
+          "level": "基础",
+          "topic": "认购认沽方向",
+          "question": "在 A 股和商品期权中，通常哪种操作更适合“直接看涨标的价格”的买方？",
+          "options": [
+            "买入认购期权（买CALL）",
+            "买入认沽期权（买PUT）",
+            "卖出认购期权（卖CALL）",
+            "卖出认沽期权（卖PUT）"
+          ],
+          "answer": 0,
+          "explanation": "最简单的做多方向策略是买入认购期权（买CALL），方向对时上涨空间理论上不封顶，最大亏损为买入时支付的权利金。"
+        },
+        {
+          "level": "基础",
+          "topic": "买方卖方风险收益",
+          "question": "关于期权买方和卖方的风险收益结构，下列说法更接近实战？",
+          "options": [
+            "买方收益有限、亏损无限；卖方收益无限、亏损有限",
+            "买卖双方的收益和风险完全对称",
+            "买方最大亏损为权利金，卖方最大收益为权利金",
+            "买方和卖方都不需要保证金"
+          ],
+          "answer": 2,
+          "explanation": "标准场内期权中，买方最大亏损就是权利金，收益向上（或向下）不封顶；卖方刚好相反，最大收益是权利金，可能面临较大的浮亏，因此需要缴纳保证金。"
+        },
+        {
+          "level": "基础",
+          "topic": "时间价值",
+          "question": "以下哪种情况更容易导致“你方向看对，但期权涨得不多甚至不涨”？",
+          "options": [
+            "买入还有较长剩余期限的期权，标的短时间内大幅波动",
+            "买入临近到期的深度实值期权，标的小幅波动",
+            "买入临近到期的虚值期权，标的缓慢、小幅走向你预期的方向",
+            "只持有标的现货，不参与期权"
+          ],
+          "answer": 2,
+          "explanation": "短期期权时间价值衰减非常快，如果标的只是慢慢挪动、波动率回落，时间损耗可能抵消方向带来的收益，导致“方向对了，钱没赚到”。"
+        },
+        {
+          "level": "基础",
+          "topic": "Delta 直觉",
+          "question": "关于期权的 Delta，以下实战中的理解更合适的是？",
+          "options": [
+            "Delta 只跟时间有关，和标的价格无关",
+            "Delta 代表期权价格对标的价格小幅变动的敏感度，近似等于“合约相当于多少份标的头寸”",
+            "Delta 永远等于 1",
+            "Delta 越大，说明期权越便宜"
+          ],
+          "answer": 1,
+          "explanation": "Delta 是最常用的希腊字母之一，可以理解为“标的涨 1 个单位，期权价格大约变动多少”；同时也可以用来估算期权头寸等效的标的持仓规模。"
+        },
+        {
+          "level": "基础",
+          "topic": "Gamma 直觉",
+          "question": "Gamma 更接近下面哪种实战理解？",
+          "options": [
+            "Gamma 是时间价值的别名",
+            "Gamma 描述的是 Delta 对标的价格变动的敏感度，Gamma 高时 Delta 变化更快",
+            "Gamma 只和隐含波动率有关，和价格无关",
+            "Gamma 与期权交易没有任何关系"
+          ],
+          "answer": 1,
+          "explanation": "Gamma 是 Delta 的变化率，反映当标的价格变动时 Delta 会变多少。临近到期、平值附近的期权 Gamma 往往较高，Delta 对价格非常敏感。"
+        },
+        {
+          "level": "基础",
+          "topic": "Theta 时间损耗",
+          "question": "关于 Theta（时间价值衰减），下面哪句话更贴近实战？",
+          "options": [
+            "Theta 越大，说明期权一定越便宜",
+            "Theta 为负通常意味着：在其他条件不变时，每过一天权利金都会少一点",
+            "Theta 只在到期日才会起作用",
+            "Theta 与剩余期限无关"
+          ],
+          "answer": 1,
+          "explanation": "对买方来说，Theta 通常为负，意味着在价格、波动率不变的情况下，时间流逝本身会让期权价格逐步缩水。"
+        }
+      ],
+      "策略题": [
+        {
+          "level": "策略",
+          "topic": "备兑开仓",
+          "question": "在上证50ETF期权中，典型的“备兑开仓”操作是哪一种？",
+          "options": [
+            "没有任何现货，直接卖出多张认购期权收权利金",
+            "持有 ETF 现货的前提下，卖出相应数量的认购期权",
+            "先卖空 ETF，然后买入认购期权保护",
+            "同时买入认购和认沽期权构成跨式"
+          ],
+          "answer": 1,
+          "explanation": "备兑开仓的核心是“有底仓 + 卖 CALL”，用持有的现货来覆盖被行权时的交割义务，换取稳定的权利金收入。"
+        },
+        {
+          "level": "策略",
+          "topic": "牛市价差",
+          "question": "买方构造牛市价差（Bull Call Spread）时，一般如何搭建？",
+          "options": [
+            "买入较低执行价的认购，同时卖出较高执行价的认购",
+            "买入较高执行价的认购，同时卖出较低执行价的认购",
+            "买入较高执行价的认沽，同时卖出较低执行价的认沽",
+            "同时买入认购和认沽，押注大波动"
+          ],
+          "answer": 0,
+          "explanation": "牛市价差 BUY 端：买低执行价 CALL、卖高执行价 CALL，用放弃部分上涨空间换取初始权利金减少，适合“温和看涨”。"
+        },
+        {
+          "level": "策略",
+          "topic": "比例价差",
+          "question": "在“比例认购价差”策略中，下列哪种结构更典型？",
+          "options": [
+            "买入 1 张认购期权，同时卖出 2 张更高执行价的认购期权",
+            "卖出 1 张认购期权，同时买入 2 张更高执行价的认购期权",
+            "买入 1 张认沽期权，同时卖出 2 张更低执行价的认沽期权",
+            "买入认购和认沽各一张"
+          ],
+          "answer": 0,
+          "explanation": "比例认购价差常见形式是“买 1 卖 2”，初始可能收到净权利金，但当标的大幅上涨超过空头腿区间时，结构有可能变成净空头，需要特别注意极端行情风险。"
+        },
+        {
+          "level": "策略",
+          "topic": "宽跨与铁鹰",
+          "question": "“宽跨式卖方策略”（卖出 OTM CALL + 卖出 OTM PUT）与“铁鹰”相比，铁鹰多了一步什么操作来限制极端风险？",
+          "options": [
+            "再买入更深度虚值的认购和认沽，形成两个价差",
+            "增加更多卖出腿，提高权利金收入",
+            "只在一个方向加买期权，另一个方向不处理",
+            "把到期日改得更长"
+          ],
+          "answer": 0,
+          "explanation": "铁鹰本质是“卖一个宽跨 + 在更远处买一个宽跨”，通过在两侧各加一腿买方保护，把极端行情下的亏损封住，代价是收到的净权利金变少。"
+        },
+        {
+          "level": "策略",
+          "topic": "保护性PUT",
+          "question": "所谓“保护性 PUT”，更接近以下哪种组合？",
+          "options": [
+            "空仓 + 买入认沽期权",
+            "多头现货 + 买入认沽期权",
+            "多头现货 + 卖出认购期权",
+            "卖出认购 + 卖出认沽"
+          ],
+          "answer": 1,
+          "explanation": "保护性 PUT = 现货多头 + 买入认沽，相当于给现货买了一份价格保险，下跌时由 PUT 赔付，上涨则由现货参与。"
+        },
+        {
+          "level": "策略",
+          "topic": "宽跨买方",
+          "question": "你认为未来一段时间行情会有大波动，但可能不是马上发生，想降低成本，可考虑的“宽跨买方”大致是什么结构？",
+          "options": [
+            "买入较深度虚值的认购和认沽，两边都离当前价更远",
+            "只买入平值认购期权",
+            "只卖出虚值认沽期权",
+            "买入平值认购、卖出虚值认沽"
+          ],
+          "answer": 0,
+          "explanation": "宽跨 BUY：买 OTM CALL + 买 OTM PUT，相比平值跨式更便宜，但需要更大的波动幅度才可能赚钱。"
+        }
+      ],
+      "实战题": [
+        {
+          "level": "实战",
+          "topic": "锁定盈利",
+          "question": "你买入一张认购期权后，标的已大涨，期权价格翻倍。此时你担心回撤，希望“锁住部分盈利但又保留一定继续上涨空间”，下列哪种操作更接近这个思路？",
+          "options": [
+            "直接平仓卖出原来的认购期权，完全离场",
+            "再买入一张更高执行价的认购期权，加码做多",
+            "在原有多头认购的基础上，卖出一张更高执行价的认购期权，构成牛市价差",
+            "卖出多张认沽期权，赚更多权利金"
+          ],
+          "answer": 2,
+          "explanation": "在已有多头 CALL 上加一张更高执行价空头 CALL，会把头寸变成牛市价差，向上收益被封顶，但可以部分锁定现在的浮盈。"
+        },
+        {
+          "level": "实战",
+          "topic": "跌破支撑的处理",
+          "question": "你卖出了若干张虚值认沽期权（卖PUT）收权利金，结果标的快速跌破你原先看好的支撑位。此时下列哪种做法更偏向风险控制？",
+          "options": [
+            "继续加倍卖出更多虚值认沽，把成本摊低",
+            "不做任何处理，直到保证金不足被强平",
+            "买入相同或更虚值的认沽期权，形成熊市价差，或直接减仓平仓",
+            "把所有资金都补充到期货账户里，加大杠杆"
+          ],
+          "answer": 2,
+          "explanation": "当支撑被有效跌破、走势和预期相反时，优先考虑控制风险：可以买入保护腿把裸卖 PUT 变成价差，封住最大亏损；或者直接减仓/平仓，先保护账户安全。"
+        },
+        {
+          "level": "实战",
+          "topic": "Gamma 对冲",
+          "question": "你做了一个接近平值、临近到期的 BUY 跨式（买CALL+买PUT），并尝试用标的做 Gamma Scalping。以下哪种描述更接近你需要面对的现实？",
+          "options": [
+            "Gamma 很低，Delta 基本不变，可以很久不调仓",
+            "Gamma 很高，标的小幅波动就会让 Delta 快速偏离，需要更频繁小步对冲",
+            "只要方向猜对一次，就永远不用再调仓",
+            "Gamma 与剩余期限无关，只看主观判断"
+          ],
+          "answer": 1,
+          "explanation": "临近到期且接近平值的期权 Gamma 较高，标的稍微一动，Delta 就会明显变化，做 Gamma Scalping 时往往需要更细致、更频繁的调仓。"
+        },
+        {
+          "level": "实战",
+          "topic": "调整 Delta",
+          "question": "你目前总体 Delta 明显为正（整体偏多），但短期对行情有些犹豫，希望把 Delta 调平或略微减小，而不想完全平掉所有多头期权，下列哪种思路更合理？",
+          "options": [
+            "额外再买入一批认购期权",
+            "卖出一部分认购期权，或买入少量认沽期权，对冲部分 Delta",
+            "立刻把所有持仓全部平掉，重新开始",
+            "只在期货上加仓做多"
+          ],
+          "answer": 1,
+          "explanation": "如果想温和地把组合 Delta 降下来，可以通过卖出部分多头认购、买入一定数量认沽，或者在期货/现货上做部分对冲，而不是简单“砍光一切”。"
+        },
+        {
+          "level": "实战",
+          "topic": "短周期周权",
+          "question": "周度期权（周权）在实战中的主要特点，下列哪项更接近？",
+          "options": [
+            "时间价值衰减慢，适合长期持有",
+            "Gamma 和 Theta 都比较温和",
+            "到期快，Gamma 高、Theta 也大，对方向和节奏要求更高",
+            "只能用来做套保，不能投机"
+          ],
+          "answer": 2,
+          "explanation": "周权剩余期限短，时间价值每天都在快速衰减，同时平值附近 Gamma 较高，对方向、波动和节奏的要求都更高。"
+        }
+      ],
+      "商品期权": [
+        {
+          "level": "商品期权",
+          "topic": "期货期权标的",
+          "question": "以下哪种对中国商品期权标的的描述更准确？",
+          "options": [
+            "标的是相应商品的现货即时价格",
+            "标的是交易所指定的商品期货合约，例如豆粕期货、沪铜期货的某个合约",
+            "标的是国外某个指数价格",
+            "标的是人民币兑美元汇率"
+          ],
+          "answer": 1,
+          "explanation": "国内商品期权本质上是“期货期权”，标的是交易所指定的期货合约，如豆粕期货某一合约、沪铜期货某一合约。"
+        },
+        {
+          "level": "商品期权",
+          "topic": "结算价与收盘价",
+          "question": "在商品期权到期日，期权结算价值通常是根据哪个价格来计算更为常见？",
+          "options": [
+            "期货合约全天最高价或最低价",
+            "随意抽取某一个成交价",
+            "交易所规则规定的“期货结算价”或特定时段的加权平均价",
+            "当天第一个成交价"
+          ],
+          "answer": 2,
+          "explanation": "商品期权到期的结算价值通常参考期货合约的结算价，或指定时段的加权平均价，计算方式在交易所规则中事先写明，并不等于简单的收盘最后一笔成交。"
+        },
+        {
+          "level": "商品期权",
+          "topic": "隐含波动率实战影响",
+          "question": "关于商品期权的隐含波动率（IV），以下哪种说法更接近实战？",
+          "options": [
+            "IV 越高期权越便宜，适合买入",
+            "IV 越低期权越贵，适合卖出",
+            "IV 高低本身不代表方向，但会极大影响权利金水平和时间价值",
+            "只要看标的 K 线，不用关心 IV"
+          ],
+          "answer": 2,
+          "explanation": "隐含波动率反映市场对未来波动的定价，IV 高时权利金偏贵，IV 低时权利金偏便宜；但它本身并不直接告诉你价格是涨还是跌。"
+        },
+        {
+          "level": "商品期权",
+          "topic": "主力合约切换",
+          "question": "在商品期货期权交易中，下列哪种做法更有利于避免“主力合约切换”带来的流动性和定价问题？",
+          "options": [
+            "永远只做最远月的期货期权",
+            "完全不看合约持仓量和成交量",
+            "关注期货合约的持仓量和成交量变化，适时把头寸从老主力滚动到新主力合约对应的期权",
+            "只做期权，不关心期货合约是哪一月"
+          ],
+          "answer": 2,
+          "explanation": "商品期货有主力合约切换的节奏，期权标的合约也会随之变化，实战中需要关注期货合约的持仓和成交，按需滚动头寸。"
+        }
+      ],
+      "风险管理": [
+        {
+          "level": "风控",
+          "topic": "保证金压力",
+          "question": "你卖出了较多虚值认沽期权，市场单边大跌、隐含波动率飙升，保证金占用迅速上升。下列哪种行为更接近理性风控？",
+          "options": [
+            "继续加倍卖出更多认沽，摊低成本",
+            "直接无视风险，等券商或期货公司来电话提醒",
+            "主动减仓、用保护性买方腿把裸卖变成价差、或补充合理保证金，优先控制爆仓风险",
+            "立刻把所有资金转去买股票"
+          ],
+          "answer": 2,
+          "explanation": "卖方策略在极端行情下保证金压力会非常大，理性做法是控制敞口：减仓、加保护腿封住亏损上限、合理补充保证金，而不是“梭哈对冲”。"
+        },
+        {
+          "level": "风控",
+          "topic": "交易所保证金规则直觉",
+          "question": "关于各交易所的期权卖方保证金规则，下列哪种理解更适合作为实战直觉？",
+          "options": [
+            "保证金是固定不变的，不会随行情变化",
+            "不同交易所、不同品种有不同的风控参数，但共同目标都是覆盖极端行情下的潜在风险",
+            "只有股指期权才收保证金，商品期权不收",
+            "保证金多少完全由客户经理拍脑袋决定"
+          ],
+          "answer": 1,
+          "explanation": "具体公式各不相同，但核心原则类似：考虑标的价格、波动率、剩余期限、合约方向等因素，估算在一定极端行情下的潜在亏损，要求卖方准备足够保证金。"
+        },
+        {
+          "level": "风控",
+          "topic": "波动率陷阱",
+          "question": "以下哪种情形最容易出现“方向看对但还是亏钱”的典型波动率陷阱？",
+          "options": [
+            "在隐含波动率非常高时追买短期期权，之后方向对了但 IV 快速回落",
+            "在隐含波动率较低时分批买入长期期权，之后 IV 震荡略升",
+            "买入长期深度价内期权，持有时间很短就平仓",
+            "完全买现货，不碰期权"
+          ],
+          "answer": 0,
+          "explanation": "IV 在高位时，期权价格中包含大量“波动率溢价”，如果后续波动率回落，哪怕标的方向对了，权利金也可能因为 IV 下跌而下跌。"
+        },
+        {
+          "level": "风控",
+          "topic": "仓位管理",
+          "question": "对于刚接触期权不久的投资者，下列哪种仓位和策略选择更适合作为起步？",
+          "options": [
+            "一开始就用大部分资金做裸卖方策略，靠收权利金赚快钱",
+            "用小仓位做买方策略，先熟悉波动率、时间价值和结算规则，再逐步尝试组合和卖方",
+            "只做高杠杆日内短线，全仓频繁进出",
+            "把所有资金都买入深度虚值短期期权，博暴涨"
+          ],
+          "answer": 1,
+          "explanation": "新手更适合用小仓位买方练习，先理解规则和波动特性；卖方策略虽然看起来胜率高，但风控要求更高，不宜一上来就重仓。"
+        }
+      ],
+      "动态调整": [
+        {
+          "level": "动态调整",
+          "topic": "加腿锁盈",
+          "question": "你原本持有一张平值认购期权，标的大涨后期权已经大幅浮盈，但你又不想完全离场。下列哪种是较为常见的“加腿锁盈”思路？",
+          "options": [
+            "立即把期权平仓，之后不再参与",
+            "在原多头认购上，加卖一张更高执行价认购，将单腿变成牛市价差",
+            "再买一张平值认沽期权，构成跨式",
+            "加仓买入更多同样执行价的认购"
+          ],
+          "answer": 1,
+          "explanation": "通过在已有多头 CALL 上加卖一张更高执行价 CALL，可以用牛市价差锁定一部分已有浮盈，同时保留有限的进一步上涨空间。"
+        },
+        {
+          "level": "动态调整",
+          "topic": "移仓滚动",
+          "question": "当你持有某个近月期权组合，接近到期但你仍想保持类似头寸结构时，下列哪种操作更接近“移仓滚动”的思路？",
+          "options": [
+            "强行持有到期，不做任何操作",
+            "把近月期权平仓，同时在远月开立相似结构（如相近执行价的同类策略）",
+            "只在现有合约上频繁加减仓，不考虑远月",
+            "把所有期权平掉，改成只持有现货"
+          ],
+          "answer": 1,
+          "explanation": "移仓滚动的核心是：在旧合约到期前平掉旧仓，在新到期月份上重建类似结构，以延续策略而非简单“硬扛到最后一天”。"
+        },
+        {
+          "level": "动态调整",
+          "topic": "从宽跨到铁鹰",
+          "question": "你原本卖出了一个宽跨式组合（卖OTM CALL + 卖OTM PUT），权利金还不错，但担心极端行情风险。下列哪种调整更接近“变宽跨为铁鹰”的操作？",
+          "options": [
+            "在更远价位再各卖出一组认购和认沽",
+            "在更远价位各买入一组认购和认沽，变成两个价差组合",
+            "平掉所有空头腿，只保留现货",
+            "改为买入跨式，完全反向操作"
+          ],
+          "answer": 1,
+          "explanation": "铁鹰 = 卖近、买远，卖出一个宽跨的同时，在更远执行价买入一个保护宽跨，从而锁定最大亏损，把无限风险变成有限风险。"
+        },
+        {
+          "level": "动态调整",
+          "topic": "Gamma Scalping 思路",
+          "question": "在用短期期权做 Gamma Scalping 时，下列哪种习惯更符合动态调整的理念？",
+          "options": [
+            "完全不看盘，等到期再说",
+            "只在行情特别剧烈的某一两天调一次仓",
+            "根据预设区间，当标的价格触及某些价位时，用小仓位多次、分批地用现货/期货对冲 Delta，赚取来回波动",
+            "只在临近收盘的最后一分钟才考虑对冲"
+          ],
+          "answer": 2,
+          "explanation": "Gamma Scalping 的核心是在高 Gamma 区间利用标的来回波动，通过多次小步对冲 Delta，把波动“变现”，而不是一刀大赌或完全不管。"
+        }
+      ]
+    };
+
+    // ============== 配置部分 ==============
+    const CATEGORY_META = {
+      "基础题": {
+        desc: "认购认沽 · 买卖双方 · 时间价值 · 希腊字母直觉理解"
+      },
+      "策略题": {
+        desc: "比例/反比例价差 · 备兑 · 保护性PUT · 牛熊价差 · 宽跨 · 铁鹰"
+      },
+      "实战题": {
+        desc: "锁盈利 · 移动执行价 · Gamma 对冲 · 调整 Delta · 跌破支撑如何活下来"
+      },
+      "商品期权": {
+        desc: "期货期权特性 · 结算价 vs 收盘价 · 隐含波动率与实战影响"
+      },
+      "风险管理": {
+        desc: "保证金压力 · 交易所保证金规则直觉 · 波动率陷阱 · 仓位管理"
+      },
+      "动态调整": {
+        desc: "加腿减腿 · 移仓滚动 · Gamma Scalping · 用期权结构做动态调整"
+      }
+    };
+
+    const STORAGE_KEY_PREFIX = "optionQuiz_progress_"; // + categoryName
+
+    // ============== 状态变量 ==============
+    let allQuestions = QUESTION_BANK; // 直接使用内置题库
+    let currentCategory = null;  // string
+    let currentMode = null;      // "challenge" or "practice"
+
+    let currentIndex = 0;        // 闯关模式下的题号
+    let score = 0;
+    let questionOrder = [];      // 闯关模式下的题目顺序（索引数组）
+
+    // ============== DOM ==============
+    const modeScreen = document.getElementById("mode-screen");
+    const challengeCategoryList = document.getElementById("challenge-category-list");
+    const practiceCategoryList = document.getElementById("practice-category-list");
+
+    const gameScreen = document.getElementById("game-screen");
+    const modeTag = document.getElementById("mode-tag");
+    const categoryTag = document.getElementById("category-tag");
+    const questionCounter = document.getElementById("question-counter");
+    const scoreArea = document.getElementById("score-area");
+    const scoreText = document.getElementById("score-text");
+    const totalText = document.getElementById("total-text");
+    const progressInner = document.getElementById("progress-inner");
+
+    const questionMeta = document.getElementById("question-meta");
+    const questionText = document.getElementById("question-text");
+    const optionsBox = document.getElementById("options");
+    const feedback = document.getElementById("feedback");
+
+    const backBtn = document.getElementById("back-btn");
+    const restartCategoryBtn = document.getElementById("restart-category-btn");
+    const nextBtn = document.getElementById("next-btn");
+
+    const endScreen = document.getElementById("end-screen");
+    const finalScore = document.getElementById("final-score");
+
+    // ============== 工具函数 ==============
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function saveProgress(category, data) {
+      const key = STORAGE_KEY_PREFIX + category;
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function loadProgress(category) {
+      const key = STORAGE_KEY_PREFIX + category;
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function clearProgress(category) {
+      const key = STORAGE_KEY_PREFIX + category;
+      localStorage.removeItem(key);
+    }
+
+    // 渲染模式选择界面的分类列表
+    function renderCategoryLists() {
+      const categories = Object.keys(CATEGORY_META);
+
+      categories.forEach(cat => {
+        const meta = CATEGORY_META[cat] || {};
+        const questions = allQuestions[cat] || [];
+        const count = questions.length;
+
+        // 闯关模式列表
+        const row1 = document.createElement("div");
+        row1.className = "cat-row";
+
+        const info1 = document.createElement("div");
+        info1.className = "cat-info";
+        const title1 = document.createElement("div");
+        title1.className = "cat-title";
+        title1.textContent = cat;
+        const desc1 = document.createElement("div");
+        desc1.className = "cat-desc";
+        const progress = loadProgress(cat);
+        let progressText = "";
+        if (progress && progress.mode === "challenge") {
+          const totalQ = (allQuestions[cat] || []).length;
+          const idx = Math.min(progress.currentIndex + 1, totalQ);
+          progressText = `当前进度：第 ${idx} 题 / 共 ${totalQ} 题`;
+        } else {
+          progressText = `题目数量：${count} 题`;
+        }
+        desc1.textContent = progressText;
+        info1.appendChild(title1);
+        info1.appendChild(desc1);
+
+        const btnGroup1 = document.createElement("div");
+        btnGroup1.className = "btn-group";
+
+        if (progress && progress.mode === "challenge" && progress.currentIndex < count) {
+          const contBtn = document.createElement("button");
+          contBtn.className = "btn-primary";
+          contBtn.textContent = "继续闯关";
+          contBtn.onclick = () => startChallenge(cat, true);
+          btnGroup1.appendChild(contBtn);
+        }
+
+        const startBtn = document.createElement("button");
+        startBtn.className = "btn-secondary";
+        startBtn.textContent = "重新开始";
+        startBtn.onclick = () => startChallenge(cat, false);
+        btnGroup1.appendChild(startBtn);
+
+        row1.appendChild(info1);
+        row1.appendChild(btnGroup1);
+        challengeCategoryList.appendChild(row1);
+
+        // 自由练习列表
+        const row2 = document.createElement("div");
+        row2.className = "cat-row";
+
+        const info2 = document.createElement("div");
+        info2.className = "cat-info";
+        const title2 = document.createElement("div");
+        title2.className = "cat-title";
+        title2.textContent = cat;
+        const desc2 = document.createElement("div");
+        desc2.className = "cat-desc";
+        desc2.textContent = meta.desc || "";
+        info2.appendChild(title2);
+        info2.appendChild(desc2);
+
+        const btnGroup2 = document.createElement("div");
+        btnGroup2.className = "btn-group";
+        const practiceBtn = document.createElement("button");
+        practiceBtn.className = "btn-primary";
+        practiceBtn.textContent = "开始练习";
+        practiceBtn.onclick = () => startPractice(cat);
+        btnGroup2.appendChild(practiceBtn);
+
+        row2.appendChild(info2);
+        row2.appendChild(btnGroup2);
+        practiceCategoryList.appendChild(row2);
+      });
+    }
+
+    // ============== 模式启动 ==============
+    function startChallenge(category, resume) {
+      const questions = allQuestions[category] || [];
+      if (!questions.length) {
+        alert("该分类暂时没有题目，请先在 QUESTION_BANK 中添加。");
+        return;
+      }
+
+      currentMode = "challenge";
+      currentCategory = category;
+      endScreen.classList.add("hidden");
+
+      // 读取或重置进度
+      if (resume) {
+        const saved = loadProgress(category);
+        if (saved && saved.mode === "challenge") {
+          currentIndex = saved.currentIndex || 0;
+          score = saved.score || 0;
+          questionOrder = saved.order || questions.map((_, idx) => idx);
+        } else {
+          resetChallengeState();
+        }
+      } else {
+        if (loadProgress(category)) {
+          const ok = confirm("确定要清空本分类的历史进度，从头开始闯关吗？");
+          if (!ok) return;
+        }
+        resetChallengeState();
+      }
+
+      // 切换界面
+      modeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      scoreArea.style.display = "block";
+      modeTag.textContent = "闯关模式";
+      categoryTag.textContent = category;
+
+      totalText.textContent = questionOrder.length;
+      scoreText.textContent = score;
+
+      showCurrentQuestion();
+    }
+
+    function resetChallengeState() {
+      const questions = allQuestions[currentCategory] || [];
+      currentIndex = 0;
+      score = 0;
+      // 闯关模式：随机排列题目顺序并保存
+      questionOrder = shuffleArray(questions.map((_, idx) => idx));
+      saveProgress(currentCategory, {
+        mode: "challenge",
+        currentIndex,
+        score,
+        order: questionOrder
+      });
+    }
+
+    function startPractice(category) {
+      const questions = allQuestions[category] || [];
+      if (!questions.length) {
+        alert("该分类暂时没有题目，请先在 QUESTION_BANK 中添加。");
+        return;
+      }
+
+      currentMode = "practice";
+      currentCategory = category;
+      currentIndex = -1; // 用随机抽题，不用顺序索引
+      score = 0;
+      questionOrder = [];
+
+      modeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      scoreArea.style.display = "none"; // 自由练习不计分
+      modeTag.textContent = "自由练习";
+      categoryTag.textContent = category;
+
+      progressInner.style.width = "0%";
+      totalText.textContent = questions.length;
+      questionCounter.textContent = "";
+      endScreen.classList.add("hidden");
+
+      showNextPracticeQuestion();
+    }
+
+    // ============== 显示题目 ==============
+    function showCurrentQuestion() {
+      const questions = allQuestions[currentCategory] || [];
+      if (currentMode === "challenge") {
+        if (currentIndex >= questionOrder.length) {
+          // 闯关结束
+          handleChallengeEnd();
+          return;
+        }
+        const qIndex = questionOrder[currentIndex];
+        const q = questions[qIndex];
+        renderQuestion(q, currentIndex + 1, questionOrder.length);
+        const progress = ((currentIndex) / questionOrder.length) * 100;
+        progressInner.style.width = progress.toFixed(1) + "%";
+      }
+    }
+
+    function showNextPracticeQuestion() {
+      const questions = allQuestions[currentCategory] || [];
+      if (!questions.length) return;
+      const randomIndex = Math.floor(Math.random() * questions.length);
+      const q = questions[randomIndex];
+
+      // 自由练习显示已做题数（不计分）
+      if (currentIndex < 0) currentIndex = 0;
+      else currentIndex += 1;
+
+      renderQuestion(q, currentIndex, 0); // total=0 表示自由练习
+      progressInner.style.width = "0%";
+    }
+
+    function renderQuestion(q, number, total) {
+      feedback.textContent = "";
+      feedback.className = "";
+      nextBtn.disabled = true;
+      endScreen.classList.add("hidden");
+
+      if (currentMode === "challenge") {
+        questionCounter.textContent = `第 ${number} 题 / 共 ${total} 题`;
+      } else {
+        questionCounter.textContent = `已练习 ${number} 题`;
+      }
+
+      const tags = [];
+      if (q.level) tags.push(q.level);
+      if (q.topic) tags.push(q.topic);
+      questionMeta.textContent = tags.length ? `标签：${tags.join(" · ")}` : "";
+
+      questionText.textContent = q.question;
+      optionsBox.innerHTML = "";
+
+      (q.options || []).forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        const label = ["A", "B", "C", "D"][idx] || "?";
+        btn.textContent = label + "．" + opt;
+        btn.onclick = () => handleAnswer(q, idx, btn);
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(q, selectedIndex, clickedBtn) {
+      const buttons = optionsBox.querySelectorAll(".option-btn");
+      buttons.forEach(btn => btn.classList.add("disabled"));
+
+      const correctIndex = q.answer;
+
+      buttons.forEach((btn, idx) => {
+        if (idx === correctIndex) btn.classList.add("correct");
+        if (idx === selectedIndex && idx !== correctIndex) btn.classList.add("wrong");
+      });
+
+      if (selectedIndex === correctIndex) {
+        if (currentMode === "challenge") {
+          score += 1;
+          scoreText.textContent = score;
+        }
+        feedback.className = "correct";
+        feedback.innerHTML = `<span class="tag tag-correct">回答正确 ✓</span>${q.explanation || ""}`;
+      } else {
+        feedback.className = "wrong";
+        const correctText = (q.options && q.options[correctIndex]) || "";
+        feedback.innerHTML =
+          `<span class="tag tag-wrong">回答错误 ✗</span>` +
+          `正确答案是：<b>${["A","B","C","D"][correctIndex] || ""}</b>．${correctText}<br>` +
+          (q.explanation || "");
+      }
+
+      nextBtn.disabled = false;
+
+      // 闯关模式下保存进度
+      if (currentMode === "challenge") {
+        saveProgress(currentCategory, {
+          mode: "challenge",
+          currentIndex,
+          score,
+          order: questionOrder
+        });
+      }
+    }
+
+    // ============== 按钮操作 ==============
+    nextBtn.addEventListener("click", () => {
+      if (currentMode === "challenge") {
+        currentIndex += 1;
+        showCurrentQuestion();
+      } else if (currentMode === "practice") {
+        showNextPracticeQuestion();
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      gameScreen.classList.add("hidden");
+      modeScreen.classList.remove("hidden");
+      challengeCategoryList.innerHTML = "";
+      practiceCategoryList.innerHTML = "";
+      renderCategoryLists(); // 更新进度显示
+    });
+
+    restartCategoryBtn.addEventListener("click", () => {
+      if (!currentCategory) return;
+      if (currentMode === "challenge") {
+        const ok = confirm("确定要重置本分类的闯关进度，从头开始？");
+        if (!ok) return;
+        clearProgress(currentCategory);
+        startChallenge(currentCategory, false);
+      } else {
+        // 自由练习重来就是重新计数 & 再抽题
+        currentIndex = 0;
+        showNextPracticeQuestion();
+      }
+    });
+
+    function handleChallengeEnd() {
+      // 闯关结束，清除进度
+      clearProgress(currentCategory);
+      progressInner.style.width = "100%";
+      questionText.textContent = "本分类所有题目已答完。";
+      optionsBox.innerHTML = "";
+      feedback.textContent = "";
+      nextBtn.disabled = true;
+
+      endScreen.classList.remove("hidden");
+      const total = questionOrder.length;
+      const percent = total ? ((score / total) * 100).toFixed(1) : 0;
+      finalScore.textContent = `本次得分：${score} / ${total}，正确率约 ${percent}%。`;
+    }
+
+    // 页面加载完成后初始化
+    window.addEventListener("load", () => {
+      renderCategoryLists();
+    });
+  </script>
+</body>
+</html>
